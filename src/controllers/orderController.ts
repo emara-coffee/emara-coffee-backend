@@ -33,7 +33,7 @@ export const placeOrder = async (req: AuthRequest, res: Response): Promise<void>
     await db.transaction(async (tx) => {
       const newOrder = await tx.insert(orders).values({
         userId,
-        addressId,
+        addressId: addressId as string,
         totalAmount: totalAmount.toString(),
         status: 'placed',
       }).returning();
@@ -104,7 +104,7 @@ export const getAllOrders = async (req: Request, res: Response): Promise<void> =
 
 export const updateOrderStatus = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { status } = req.body;
 
     const updatedOrder = await db.update(orders)
@@ -120,7 +120,7 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
 
 export const cancelOrder = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const userId = req.user!.userId;
 
     const order = await db.select().from(orders).where(eq(orders.id, id));
@@ -156,7 +156,7 @@ export const cancelOrder = async (req: AuthRequest, res: Response): Promise<void
 
 export const updateRefundStatus = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { refundStatus } = req.body;
 
     const updatedOrder = await db.update(orders)

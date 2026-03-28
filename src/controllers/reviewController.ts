@@ -10,7 +10,7 @@ export const addReview = async (req: AuthRequest, res: Response): Promise<void> 
     const userId = req.user!.userId;
 
     const newReview = await db.insert(reviews).values({
-      productId,
+      productId: productId as string,
       userId,
       rating,
       text,
@@ -25,7 +25,7 @@ export const addReview = async (req: AuthRequest, res: Response): Promise<void> 
 
 export const getProductReviews = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { productId } = req.params;
+    const productId = req.params.productId as string;
 
     const productReviews = await db.query.reviews.findMany({
       where: (reviews, { eq }) => eq(reviews.productId, productId),
@@ -33,7 +33,7 @@ export const getProductReviews = async (req: Request, res: Response): Promise<vo
         user: {
           columns: { firstName: true, lastName: true },
         },
-        comments: true, // Matches 'comments: many(reviewComments)' in schema
+        comments: true,
       },
       orderBy: (reviews, { desc }) => [desc(reviews.createdAt)],
     });
@@ -50,7 +50,7 @@ export const addReviewComment = async (req: AuthRequest, res: Response): Promise
     const userId = req.user!.userId;
 
     const newComment = await db.insert(reviewComments).values({
-      reviewId,
+      reviewId: reviewId as string,
       userId,
       text,
     }).returning();

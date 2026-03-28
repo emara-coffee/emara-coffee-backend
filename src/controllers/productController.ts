@@ -28,7 +28,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
 
     const conditions = [];
-    if (search) conditions.push(ilike(products.name, `%${search}%`));
+    if (search) conditions.push(ilike(products.name, `%${search as string}%`));
     if (category) conditions.push(eq(products.category, category as string));
     if (minPrice) conditions.push(gte(products.price, minPrice as string));
     if (maxPrice) conditions.push(lte(products.price, maxPrice as string));
@@ -58,7 +58,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
 
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const product = await db.select().from(products).where(eq(products.id, id));
     
     if (product.length === 0) {
@@ -74,7 +74,7 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
 
 export const updateProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { name, description, category, price, stock, images } = req.body;
     
     const updatedProduct = await db.update(products)

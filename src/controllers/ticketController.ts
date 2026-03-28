@@ -60,9 +60,10 @@ export const getAllTickets = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ error: "Failed to fetch all tickets" });
   }
 };
+
 export const getTicketMessages = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { ticketId } = req.params;
+    const ticketId = req.params.ticketId as string;
     const messages = await db.query.ticketMessages.findMany({
       where: eq(ticketMessages.ticketId, ticketId),
       with: {
@@ -84,14 +85,14 @@ export const addTicketMessage = async (req: AuthRequest, res: Response): Promise
     const senderId = req.user!.userId;
 
     const newMessage = await db.insert(ticketMessages).values({
-      ticketId,
+      ticketId: ticketId as string,
       senderId,
       message,
     }).returning();
 
     await db.update(tickets)
       .set({ updatedAt: new Date() })
-      .where(eq(tickets.id, ticketId));
+      .where(eq(tickets.id, ticketId as string));
 
     res.status(201).json(newMessage[0]);
   } catch (error) {
@@ -101,7 +102,7 @@ export const addTicketMessage = async (req: AuthRequest, res: Response): Promise
 
 export const updateTicketStatus = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { status } = req.body;
 
     const updatedTicket = await db.update(tickets)

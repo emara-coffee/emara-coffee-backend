@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { eq, and } from 'drizzle-orm';
 import { db } from '../configs/db';
-import { carts, cartItems, products } from '../models/schema';
+import { carts, cartItems } from '../models/schema';
 import { AuthRequest } from '../middlewares/authMiddleware';
 
 export const addToCart = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -19,7 +19,7 @@ export const addToCart = async (req: AuthRequest, res: Response): Promise<void> 
 
     const existingItem = await db.select()
       .from(cartItems)
-      .where(and(eq(cartItems.cartId, cartId), eq(cartItems.productId, productId)));
+      .where(and(eq(cartItems.cartId, cartId), eq(cartItems.productId, productId as string)));
 
     if (existingItem.length > 0) {
       const updatedItem = await db.update(cartItems)
@@ -32,7 +32,7 @@ export const addToCart = async (req: AuthRequest, res: Response): Promise<void> 
 
     const newItem = await db.insert(cartItems).values({
       cartId,
-      productId,
+      productId: productId as string,
       quantity: quantity || 1,
     }).returning();
 
@@ -49,7 +49,7 @@ export const getCart = async (req: AuthRequest, res: Response): Promise<void> =>
     const userCart = await db.query.carts.findFirst({
       where: (carts, { eq }) => eq(carts.userId, userId),
       with: {
-        items: { // This matches 'items: many(cartItems)' in your schema
+        items: {
           with: {
             product: true,
           },
@@ -70,7 +70,7 @@ export const getCart = async (req: AuthRequest, res: Response): Promise<void> =>
 
 export const removeFromCart = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { itemId } = req.params;
+    const itemId = req.params.itemId as string;
     
     await db.delete(cartItems).where(eq(cartItems.id, itemId));
     
