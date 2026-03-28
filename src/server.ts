@@ -24,8 +24,7 @@ const PORT = process.env.PORT || 8080;
 
 app.use(cors({
     origin: [
-        'http://localhost:3000',
-        'https://thermostatic-winterweight-isabell.ngrok-free.dev'
+        `${process.env.FRONTEND_URL}`
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
