@@ -13,7 +13,7 @@ export const generatePayPalAccessToken = async (): Promise<string> => {
       },
     });
 
-    const data = await response.json();
+    const data = (await response.json()) as any;
     
     if (!response.ok) {
        throw new Error(data.error_description || 'Failed to generate PayPal access token');
@@ -21,8 +21,7 @@ export const generatePayPalAccessToken = async (): Promise<string> => {
     
     return data.access_token;
   } catch (error) {
-    console.error("PayPal Auth Error:", error);
-    throw error; // Let the checkout controller catch this
+    throw error;
   }
 };
 
@@ -34,7 +33,6 @@ export const createPayPalOrder = async (amount: number, receipt: string | number
       intent: 'CAPTURE',
       purchase_units: [
         {
-          // Converted to string safely to prevent validation errors if 'receipt' is a numeric ID
           reference_id: receipt.toString(), 
           amount: {
             currency_code: 'USD', 
@@ -53,16 +51,14 @@ export const createPayPalOrder = async (amount: number, receipt: string | number
       body: JSON.stringify(payload),
     });
 
-    const data = await response.json();
+    const data = (await response.json()) as any;
     
     if (!response.ok) {
-       console.error("PayPal Order Creation Error Details:", data);
        throw new Error(data.message || 'Failed to create PayPal order');
     }
     
     return data;
   } catch (error) {
-    console.error("PayPal Create Order Exception:", error);
     throw error;
   }
 };
@@ -79,16 +75,14 @@ export const verifyAndCapturePayPalOrder = async (orderId: string): Promise<bool
       },
     });
 
-    const data = await response.json();
+    const data = (await response.json()) as any;
     
     if (!response.ok) {
-       console.error("PayPal Capture Error Details:", data);
        return false;
     }
     
     return data.status === 'COMPLETED';
   } catch (error) {
-    console.error('PayPal Capture Exception:', error);
     return false;
   }
 };

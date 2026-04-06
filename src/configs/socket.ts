@@ -2,8 +2,8 @@ import { Server, Socket } from 'socket.io';
 import { Server as HttpServer } from 'http';
 import jwt from 'jsonwebtoken';
 import { db } from './db';
-import { ticketMessages, chatMessages, supportTickets } from '../db/schema';
-import { eq } from 'drizzle-orm';
+import { ticketMessages, chatMessages, supportTickets, users } from '../db/schema';
+import { eq, and } from 'drizzle-orm';
 
 export const setupSocket = (server: HttpServer) => {
   const io = new Server(server, {
@@ -50,9 +50,7 @@ export const setupSocket = (server: HttpServer) => {
             senderRole: userRole
           });
         }
-      } catch (error) {
-        console.error('Error saving ticket message:', error);
-      }
+      } catch (error) {}
     });
 
     socket.on('join_chat', (targetUserId: string) => {
@@ -72,9 +70,7 @@ export const setupSocket = (server: HttpServer) => {
         }).returning();
 
         io.to(`chat_${roomId}`).emit('receive_chat_message', newMessage[0]);
-      } catch (error) {
-        console.error('Error saving chat message:', error);
-      }
+      } catch (error) {}
     });
 
     socket.on('update_message_status', async (data: { messageId: string, targetUserId: string, status: string }) => {
@@ -88,9 +84,7 @@ export const setupSocket = (server: HttpServer) => {
           messageId: data.messageId,
           status: data.status
         });
-      } catch (error) {
-        console.error('Error updating message status:', error);
-      }
+      } catch (error) {}
     });
 
     socket.on('disconnect', () => {});
@@ -99,17 +93,12 @@ export const setupSocket = (server: HttpServer) => {
       try {
         if (userRole !== 'ADMIN') return; 
 
-        // 1. Fetch all active users of the target role
-        const { users } = await import('../db/schema');
-        const { and, eq } = await import('drizzle-orm');
-        
         const targetUsers = await db.select({ id: users.id })
           .from(users)
           .where(and(eq(users.role, data.targetRole), eq(users.status, 'ACTIVE')));
 
         if (targetUsers.length === 0) return;
 
-        // 2. Prepare bulk insert payload
         const messagesToInsert = targetUsers.map(u => ({
           senderId: userId,
           receiverId: u.id,
@@ -117,10 +106,8 @@ export const setupSocket = (server: HttpServer) => {
           deliveryStatus: 'SENT' as any
         }));
 
-        // 3. Insert all messages
         await db.insert(chatMessages).values(messagesToInsert);
 
-        // 4. Emit to individual rooms so connected users get it instantly
         for (const u of targetUsers) {
           const roomId = [userId, u.id].sort().join('_');
           io.to(`chat_${roomId}`).emit('receive_chat_message', {
@@ -132,7 +119,6 @@ export const setupSocket = (server: HttpServer) => {
           });
         }
 
-        // 5. Tell the admin the broadcast was successful
         socket.emit('bulk_message_sent', {
           targetRole: data.targetRole,
           content: data.content,
@@ -140,9 +126,7 @@ export const setupSocket = (server: HttpServer) => {
           createdAt: new Date().toISOString()
         });
 
-      } catch (error) {
-        console.error('Error sending bulk chat message:', error);
-      }
+      } catch (error) {}
     });
   });
 

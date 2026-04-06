@@ -21,11 +21,11 @@ export const createTerm = async (req: AuthRequest, res: Response): Promise<void>
 
 export const updateTerm = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { version, title, content } = req.body;
     const updatedTerm = await db.update(termsConditions)
       .set({ version, title, content, updatedAt: new Date() })
-      .where(eq(termsConditions.id, id))
+      .where(eq(termsConditions.id as any, id as any))
       .returning();
     res.status(200).json(updatedTerm[0]);
   } catch (error) {
@@ -75,11 +75,11 @@ export const getTermsList = async (req: AuthRequest, res: Response): Promise<voi
 
 export const activateTerm = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     
     await db.transaction(async (tx) => {
       await tx.update(termsConditions).set({ isActive: false });
-      await tx.update(termsConditions).set({ isActive: true }).where(eq(termsConditions.id, id));
+      await tx.update(termsConditions).set({ isActive: true }).where(eq(termsConditions.id as any, id as any));
     });
 
     res.status(200).json({ success: true, message: 'Term activated successfully' });
@@ -90,8 +90,8 @@ export const activateTerm = async (req: AuthRequest, res: Response): Promise<voi
 
 export const deleteTerm = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
-    await db.delete(termsConditions).where(eq(termsConditions.id, id));
+    const id = req.params.id as string;
+    await db.delete(termsConditions).where(eq(termsConditions.id as any, id as any));
     res.status(200).json({ success: true });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

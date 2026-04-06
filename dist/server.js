@@ -22,6 +22,7 @@ const orderManagementRoutes_1 = __importDefault(require("./routes/admin/orderMan
 const productRoutes_1 = __importDefault(require("./routes/admin/productRoutes"));
 const ticketManagementRoutes_1 = __importDefault(require("./routes/admin/ticketManagementRoutes"));
 const userManagementRoutes_1 = __importDefault(require("./routes/admin/userManagementRoutes"));
+const termsRoutes_1 = __importDefault(require("./routes/admin/termsRoutes"));
 const dealershipRequestRoutes_1 = __importDefault(require("./routes/dealer/dealershipRequestRoutes"));
 const verificationRoutes_1 = __importDefault(require("./routes/dealer/verificationRoutes"));
 const inventoryManagementRoutes_1 = __importDefault(require("./routes/dealer/inventoryManagementRoutes"));
@@ -29,6 +30,7 @@ const articleRoutes_2 = __importDefault(require("./routes/public/articleRoutes")
 const catalogRoutes_1 = __importDefault(require("./routes/public/catalogRoutes"));
 const guidedSearchRoutes_1 = __importDefault(require("./routes/public/guidedSearchRoutes"));
 const dealerRoutes_1 = __importDefault(require("./routes/public/dealerRoutes"));
+const termsRoutes_2 = __importDefault(require("./routes/public/termsRoutes"));
 const cartRoutes_1 = __importDefault(require("./routes/shared/cartRoutes"));
 const chatRoutes_1 = __importDefault(require("./routes/shared/chatRoutes"));
 const checkoutRoutes_1 = __importDefault(require("./routes/shared/checkoutRoutes"));
@@ -40,6 +42,7 @@ const articleInteractionRoutes_1 = __importDefault(require("./routes/user/articl
 const dealerReviewRoutes_1 = __importDefault(require("./routes/user/dealerReviewRoutes"));
 const productReviewRoutes_1 = __importDefault(require("./routes/user/productReviewRoutes"));
 const app = (0, express_1.default)();
+app.set('trust proxy', 1);
 const httpServer = http_1.default.createServer(app);
 (0, socket_1.setupSocket)(httpServer);
 app.use((0, morgan_1.default)('dev', {
@@ -48,12 +51,11 @@ app.use((0, morgan_1.default)('dev', {
     }
 }));
 app.use((0, cors_1.default)({
-    origin: function (origin, callback) {
-        callback(null, true);
-    },
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning', 'Origin', 'Accept']
+    allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning', 'Origin', 'Accept'],
+    maxAge: 86400
 }));
 app.use((0, helmet_1.default)({
     crossOriginResourcePolicy: false,
@@ -70,6 +72,7 @@ app.use('/api/admin/order-management', orderManagementRoutes_1.default);
 app.use('/api/admin/products', productRoutes_1.default);
 app.use('/api/admin/ticket-management', ticketManagementRoutes_1.default);
 app.use('/api/admin/users', userManagementRoutes_1.default);
+app.use('/api/admin/terms', termsRoutes_1.default);
 app.use('/api/dealer/requests', dealershipRequestRoutes_1.default);
 app.use('/api/dealer/verification', verificationRoutes_1.default);
 app.use('/api/dealer/inventory', inventoryManagementRoutes_1.default);
@@ -77,6 +80,7 @@ app.use('/api/public/articles', articleRoutes_2.default);
 app.use('/api/public/catalog', catalogRoutes_1.default);
 app.use('/api/public/guided-search', guidedSearchRoutes_1.default);
 app.use('/api/public/dealers', dealerRoutes_1.default);
+app.use('/api/public/terms', termsRoutes_2.default);
 app.use('/api/shared/cart', cartRoutes_1.default);
 app.use('/api/shared/chat', chatRoutes_1.default);
 app.use('/api/shared/checkout', checkoutRoutes_1.default);

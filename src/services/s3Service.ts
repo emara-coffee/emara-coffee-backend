@@ -1,10 +1,10 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import { getS3Client, getBucketName, getAwsRegion } from '../configs/s3';
 
 export const uploadFileToS3 = async (file: Express.Multer.File): Promise<string> => {
   const s3Client = getS3Client();
-  const key = `uploads/${uuidv4()}-${file.originalname.replace(/\s+/g, '-')}`;
+  const key = `uploads/${crypto.randomUUID()}-${file.originalname.replace(/\s+/g, '-')}`;
 
   const command = new PutObjectCommand({
     Bucket: getBucketName(),

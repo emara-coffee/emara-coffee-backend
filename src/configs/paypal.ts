@@ -3,8 +3,6 @@ dotenv.config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
 
 export const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID as string;
 export const PAYPAL_APP_SECRET = process.env.PAYPAL_APP_SECRET as string;
-
-// Fallback added just in case the .env fails to load
 export const PAYPAL_BASE_URL = process.env.PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com';
 
 export const generatePayPalAccessToken = async (): Promise<string> => {
@@ -19,6 +17,6 @@ export const generatePayPalAccessToken = async (): Promise<string> => {
     },
   });
 
-  const data = await response.json();
+  const data = (await response.json()) as any;
   return data.access_token;
 };

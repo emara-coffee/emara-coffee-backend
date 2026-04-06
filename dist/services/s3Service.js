@@ -1,12 +1,15 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadFileToS3 = void 0;
 const client_s3_1 = require("@aws-sdk/client-s3");
-const uuid_1 = require("uuid");
+const crypto_1 = __importDefault(require("crypto"));
 const s3_1 = require("../configs/s3");
 const uploadFileToS3 = async (file) => {
     const s3Client = (0, s3_1.getS3Client)();
-    const key = `uploads/${(0, uuid_1.v4)()}-${file.originalname.replace(/\s+/g, '-')}`;
+    const key = `uploads/${crypto_1.default.randomUUID()}-${file.originalname.replace(/\s+/g, '-')}`;
     const command = new client_s3_1.PutObjectCommand({
         Bucket: (0, s3_1.getBucketName)(),
         Key: key,
