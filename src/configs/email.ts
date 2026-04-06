@@ -4,9 +4,11 @@ import nodemailer, { Transporter } from 'nodemailer';
 class EmailConfig {
   private transporter: Transporter;
 
-  constructor() {
+constructor() {
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // Must be false for port 587
       auth: {
         type: 'OAuth2',
         user: process.env.SMTP_USER,
@@ -14,6 +16,10 @@ class EmailConfig {
         clientSecret: process.env.OAUTH_CLIENT_SECRET,
         refreshToken: process.env.OAUTH_REFRESH_TOKEN,
       },
+      tls: {
+        // This is the most important part for Render
+        rejectUnauthorized: false
+      }
     });
   }
 
