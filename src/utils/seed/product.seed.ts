@@ -91,8 +91,8 @@ export const seedProducts = async () => {
           hsnCode: '09012110',
           categoryId: categoryId,
           description: `Premium ${roast.toLowerCase()} roast from the ${estate} region. Processed via the ${process.toLowerCase()} method.`,
-          images: [COFFEE_IMAGES[i % COFFEE_IMAGES.length]], // Fixed: Properly mapping the images array
-          basePrice: randInt(1200, 3500),
+          images: [COFFEE_IMAGES[i % COFFEE_IMAGES.length]], 
+          basePrice: randInt(12, 35), // Updated: Generates prices between $12 and $35
           moq: randItem([5, 10, 20]),
           stock: randInt(50, 500),
           certifications: ['Fair Trade', 'Rainforest Alliance'],
