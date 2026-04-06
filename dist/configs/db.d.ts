@@ -1,7 +1,7 @@
 import './env';
-import postgres from 'postgres';
-import * as schema from '../models/schema';
-export declare const db: import("drizzle-orm/postgres-js").PostgresJsDatabase<typeof schema> & {
-    $client: postgres.Sql<{}>;
+import { Pool } from 'pg';
+import * as schema from '../db/schema';
+export declare const db: import("drizzle-orm/node-postgres").NodePgDatabase<typeof schema> & {
+    $client: Pool;
 };
 //# sourceMappingURL=db.d.ts.map

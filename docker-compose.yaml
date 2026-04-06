@@ -1,39 +1,39 @@
 services:
   postgres:
     profiles: ["dev", "prod"]
-    image: postgres:15-alpine
-    container_name: emara_postgres
+    image: postgres:16-alpine
+    container_name: emara_coffee_postgres
     restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-emara_coffee}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - emara_network
+      - emara_coffee_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-emara_coffee}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     profiles: ["dev", "prod"]
     image: redis:7.2-alpine
-    container_name: emara_redis
+    container_name: emara_coffee_redis
     restart: unless-stopped
     ports:
-      - "6378:6379"
+      - "6379:6379"
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     volumes:
       - redis_data:/data
     networks:
-      - emara_network
+      - emara_coffee_network
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 30s
@@ -43,13 +43,13 @@ services:
   backend:
     profiles: ["prod"]
     build: .
-    container_name: emara_backend
+    container_name: emara_coffee_backend
     restart: unless-stopped
     environment:
       NODE_ENV: ${NODE_ENV}
       PORT: ${PORT}
-      DATABASE_URL: ${DATABASE_URL}
-      REDIS_URL: ${REDIS_URL}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_REGION: ${AWS_REGION}
@@ -62,22 +62,23 @@ services:
       FROM_EMAIL: ${FROM_EMAIL}
       FROM_NAME: ${FROM_NAME}
       JWT_SECRET: ${JWT_SECRET}
-      RUN_SEEDER: ${RUN_SEEDER}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
     ports:
-      - "8080:8080"
+      - "${PORT}:${PORT}"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     networks:
-      - emara_network
+      - emara_coffee_network
 
 volumes:
   postgres_data:
   redis_data:
 
 networks:
-  emara_network:
+  emara_coffee_network:
     driver: bridge
-    name: emara_network
+    name: emara_coffee_network

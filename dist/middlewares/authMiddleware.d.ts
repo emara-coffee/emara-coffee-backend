@@ -1,10 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 export interface AuthRequest extends Request {
-    user?: {
-        userId: string;
-        role: string;
-    };
+    user?: any;
 }
-export declare const authenticate: (req: AuthRequest, res: Response, next: NextFunction) => void;
-export declare const authorizeAdmin: (req: AuthRequest, res: Response, next: NextFunction) => void;
+export declare const protect: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
 //# sourceMappingURL=authMiddleware.d.ts.map

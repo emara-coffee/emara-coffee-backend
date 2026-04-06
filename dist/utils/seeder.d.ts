@@ -1,2 +1,2 @@
-export declare const seedDatabase: () => Promise<void>;
+export {};
 //# sourceMappingURL=seeder.d.ts.map

@@ -32,16 +32,14 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.db = void 0;
 require("./env");
-const postgres_js_1 = require("drizzle-orm/postgres-js");
-const postgres_1 = __importDefault(require("postgres"));
-const schema = __importStar(require("../models/schema"));
-const connectionString = process.env.DATABASE_URL;
-const client = (0, postgres_1.default)(connectionString);
-exports.db = (0, postgres_js_1.drizzle)(client, { schema });
+const node_postgres_1 = require("drizzle-orm/node-postgres");
+const pg_1 = require("pg");
+const schema = __importStar(require("../db/schema"));
+const pool = new pg_1.Pool({
+    connectionString: process.env.DATABASE_URL,
+});
+exports.db = (0, node_postgres_1.drizzle)(pool, { schema });
 //# sourceMappingURL=db.js.map

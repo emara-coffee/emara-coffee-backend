@@ -1,34 +1,34 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { db } from '../configs/db';
+import { users } from '../db/schema';
+import { eq } from 'drizzle-orm';
 
 export interface AuthRequest extends Request {
-  user?: {
-    userId: string;
-    role: string;
-  };
+  user?: any;
 }
 
-export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {
-  const token = req.headers.authorization?.split(' ')[1];
+export const protect = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  let token;
 
-  if (!token) {
-    res.status(401).json({ message: 'Authentication required' });
-    return;
-  }
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string; role: string };
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(401).json({ message: 'Invalid token' });
-  }
-};
+      const userRecords = await db.select().from(users).where(eq(users.id, decoded.id));
 
-export const authorizeAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {
-  if (req.user?.role !== 'admin') {
-    res.status(403).json({ message: 'Admin access required' });
-    return;
+      if (userRecords.length === 0) {
+        res.status(401).json({ message: 'Not authorized, user not found' });
+        return;
+      }
+
+      req.user = userRecords[0];
+      next();
+    } catch (error) {
+      res.status(401).json({ message: 'Not authorized, token failed' });
+    }
+  } else {
+    res.status(401).json({ message: 'Not authorized, no token' });
   }
-  next();
 };
